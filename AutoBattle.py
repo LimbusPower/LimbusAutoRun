@@ -31,17 +31,24 @@ PicNormalBattle12 = "NormalBattle12.png"
 PicNormalBattle13 = "NormalBattle13.png"
 PicNormalBattle22 = "NormalBattle22.png"
 PicNormalBattle33 = "NormalBattle33.png"
+PicAbnormalBattle = "AbnormalBattle.png"
 PicAbnormalBattle2 = "AbnormalBattle2.png"
 PicAbnormalBattle3 = "AbnormalBattle3.png"
+PicAbnormalBattle32 = "AbnormalBattle32.png"
 PicBossBattle = "BossBattle.png"
 PicBossBattle2 = "BossBattle2.png"
 PicBossBattle3 = "BossBattle3.png"
+PicBossBattle32 = "BossBattle32.png"
 PicEventBattle = "EventBattle.png"
 PicEventBattle3 = "EventBattle3.png"
 PicEndPoint = "EndPoint.png"
 PicEndPoint2 = "EndPoint2.png"
 PicEndPoint22 = "EndPoint22.png"
+PicEndPoint23 = "EndPoint23.png"
 PicEndPoint3 = "EndPoint3.png"
+PicEndPoint32 = "EndPoint32.png"
+PicEndPoint33 = "EndPoint33.png"
+PicEndPoint34 = "EndPoint34.png"
 PicEndPoint4 = "EndPoint4.png"
 PicEnterBattle = "EnterBattle.png"
 
@@ -70,11 +77,18 @@ PicElateTatto = "ElateTatto.png"
 PicEZippoLighter = "EZippoLighter.png"
 PicEPerversion = "EPerversion.png"
 PicEPickRose = "EPickRose.png"
+PicEPhantom = "EPhantom.png"
+PicEFieryDown = "EFieryDown.png"
+PicEHellTerfly = "EHellTerfly.png"
+PicETown = "ETown.png"
+PicETown22 = "ETown22.png"
+
 
 PicEveryHigh = "EveryHigh.png"
 PicEBossApple = "EBossApple.png"
 PicEBossFactory = "EBossFactory.png"
 PicEBossFactory2 = "EBossFactory2.png"
+PicEBossCalendar = "EBossCalendar.png"
 
 PicAnnouncer = "Announcer.png"
 PicNo1 = "No1.png"
@@ -212,7 +226,7 @@ def StartBattle():
     print("Start Battle")
     retryCount = 1
     battleCount = 1
-    while retryCount <  50:
+    while retryCount <  60:
         if FindPic(Path(PicChoseLvUp)) != (-1,-1):
             break
         if FindPic(Path(PicSelectGift)) != (-1,-1):
@@ -247,6 +261,23 @@ def StartBattle():
                         ClickPic(Path(PicEBossFactory2))
                         ClickPic(Path(PicEventProceed))
                         ClickPic(Path(PicEventSkip))
+                        if FindPic(Path(PicEventContinue)) != (-1,-1):
+                            print("Charge Stop")
+                            break
+                if FindPic(Path(PicEBossCalendar)) != (-1,-1):
+                    print("Boss Calendar")
+                    while FindPic(Path(PicEBossCalendar)) == (-1,-1):
+                        print("Charge Progress")
+                        ClickPic(Path(PicEBossCalendar))
+                        ClickPic(Path(PicEventSkip))
+                        #判定阶段
+                        while FindPic(Path(PicEventAdvantage)) != (-1,-1):
+                            print("Event charge Progress")
+                            if FindPic(Path(PicEventContinue)) != (-1,-1):
+                                break
+                            ClickPic(Path(PicEveryHigh))
+                            ClickPic(Path(PicEventCommence))
+                            ClickPic(Path(PicEventSkip))
                         if FindPic(Path(PicEventContinue)) != (-1,-1):
                             print("Charge Stop")
                             break
@@ -319,6 +350,17 @@ def EventSelectSinnner():
 def Searching():
     print("Start seachring")
     while True:
+        if FindPic(Path(PicEnterBattle)) != (-1,-1):
+            ClickXY((200,200))#误触发退回用
+        if FindPic(Path(PicRewards)) != (-1,-1):
+            print("Finished the loop ？？？" )
+            ClickPic(Path(PicConfirmW))
+            pi.click()
+            time.sleep(5)
+            ClickPic(Path(PicReceive))
+            pi.click()
+            Wait(30)
+            break
         if SeachrFor(PicEventLevelUp):
             EventLevelUp()
             return False
@@ -329,9 +371,13 @@ def Searching():
             return False
         if SeachrFor(PicNormalBattle33):
             return False
+        if SeachrFor(PicAbnormalBattle):
+            return False
         if SeachrFor(PicAbnormalBattle2):
             return False
         if SeachrFor(PicAbnormalBattle3):
+            return False
+        if SeachrFor(PicAbnormalBattle32):
             return False
         if SeachrFor(PicBossBattle):
             return False
@@ -339,6 +385,8 @@ def Searching():
             return False
         if SeachrFor(PicBossBattle3):
             return False   
+        if SeachrFor(PicBossBattle32):
+            return False  
         if SeachrFor(PicEndPoint):
             print("Finished the floor")
             return True
@@ -348,7 +396,19 @@ def Searching():
         if SeachrFor(PicEndPoint22):
             print("Finished the floor")
             return True
+        if SeachrFor(PicEndPoint23):
+            print("Finished the floor")
+            return True
         if SeachrFor(PicEndPoint3):
+            print("Finished the floor")
+            return True
+        if SeachrFor(PicEndPoint32):
+            print("Finished the floor")
+            return True
+        if SeachrFor(PicEndPoint33):
+            print("Finished the floor")
+            return True
+        if SeachrFor(PicEndPoint34):
             print("Finished the floor")
             return True
         if SeachrFor(PicEndPoint4):
@@ -394,58 +454,86 @@ def EventChoice():
             ClickPic(Path(PicEventSkip))
         #血袋ego
         elif FindPic(Path(PicEbloodPack)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("EbloodPack  EGO")
             ClickPic(Path(PicEbloodPack))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #灰烬ego
         elif FindPic(Path(PicEAshesChoice)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("EAshesChoice  EGO")
             ClickPic(Path(PicEAshesChoice))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #电🐏ego
         elif FindPic(Path(PicEeletronicSheep)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("EeletronicSheep  EGO")
             ClickPic(Path(PicEeletronicSheep))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #子弹ego
         elif FindPic(Path(PicEnixieDivergencee)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("EnixieDivergencee  EGO")
             ClickPic(Path(PicEnixieDivergencee))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #电池ego
         elif FindPic(Path(PicEstandardBattery)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("standardBattery  EGO")
             ClickPic(Path(PicEstandardBattery))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #电线杆？ego
         elif FindPic(Path(PicElateTatto)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("ElateTatto  EGO")
             ClickPic(Path(PicElateTatto))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #打火机ego
         elif FindPic(Path(PicEZippoLighter)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("ZippoLighter  EGO")
             ClickPic(Path(PicEZippoLighter))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #立方体ego
         elif FindPic(Path(PicEPerversion)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("Perversion  EGO")
             ClickPic(Path(PicEPerversion))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #摘花ego
         elif FindPic(Path(PicEPickRose)) != (-1,-1):
-            print("Coffee cup EGO")
+            print("PickRose  EGO")
             ClickPic(Path(PicEPickRose))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
+        #幻痛ego
+        elif FindPic(Path(PicEPhantom)) != (-1,-1):
+            print("Phantom  EGO")
+            ClickPic(Path(PicEPhantom))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+        #火羽毛？ego
+        elif FindPic(Path(PicEFieryDown)) != (-1,-1):
+            print("FieryDown  EGO")
+            ClickPic(Path(PicEFieryDown))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+        #火蝴蝶？ego
+        elif FindPic(Path(PicEHellTerfly)) != (-1,-1):
+            print("HellTerfly  EGO")
+            ClickPic(Path(PicEHellTerfly))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+        #Hello world？ego
+        elif FindPic(Path(PicETown)) != (-1,-1):
+            print("Hello town EGO")
+            ClickPic(Path(PicETown))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+            while FindPic(Path(PicEventContinue)) != (-1,-1):
+                ClickPic(Path(PicETown22))#升级卡不升级
+                ClickPic(Path(PicEventProceed))
+                ClickPic(Path(PicEventSkip))
         else:
             print("All unknown ，select a random choice")
             ClickPic(Path(PicEventRandomSelect))
@@ -646,10 +734,10 @@ if __name__ == '__main__':
                 loop = loop + 1
                 ClickPic(Path(PicConfirmW))
                 pi.click()
-                time.sleep(3)
+                time.sleep(15)
                 ClickPic(Path(PicReceive))
                 pi.click()
-                Wait(30)
+                Wait(50)
                 break
             print("Auto Run " +str(floor)+" floor and " +str(step)+" step")
             pi.scroll(10) # 向上滚动10格
@@ -673,7 +761,7 @@ if __name__ == '__main__':
                 ClickXY((900,900))           
             else:
                 step = step + 1
-        
+
        
 
    
