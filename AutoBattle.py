@@ -7,6 +7,7 @@
 import cv2
 import aircv
 from PIL import ImageGrab
+from PIL import Image
 import numpy as np
 import os.path
 import pyautogui as pi
@@ -37,6 +38,7 @@ PicAbnormalBattle3 = "AbnormalBattle3.png"
 PicAbnormalBattle32 = "AbnormalBattle32.png"
 PicBossBattle = "BossBattle.png"
 PicBossBattle2 = "BossBattle2.png"
+PicBossBattle22 = "BossBattle22.png"
 PicBossBattle3 = "BossBattle3.png"
 PicBossBattle32 = "BossBattle32.png"
 PicEventBattle = "EventBattle.png"
@@ -80,6 +82,8 @@ PicEPickRose = "EPickRose.png"
 PicEPhantom = "EPhantom.png"
 PicEFieryDown = "EFieryDown.png"
 PicEHellTerfly = "EHellTerfly.png"
+PicEGadget = "EGadget.png"
+PicEBundle = "EBundle.png"
 PicETown = "ETown.png"
 PicETown22 = "ETown22.png"
 
@@ -116,8 +120,12 @@ PicNo10Sign = "No10Sign.png"
 PicNo11Sign = "No11Sign.png"
 PicNo12Sign = "No12Sign.png"
 
+PicNo1SignNew = "No1SignNew.png"
 PicNo2SignNew = "No2SignNew.png"
+PicNo3SignNew = "No3SignNew.png"
+PicNo4SignNew = "No4SignNew.png"
 PicNo5SignNew = "No5SignNew.png"
+PicNo6SignNew = "No6SignNew.png"
 PicNo9SignNew = "No9SignNew.png"
 PicNo10SignNew = "No10SignNew.png"
 PicNo11SignNew = "No11ignNew.png"
@@ -138,9 +146,11 @@ PicNo11_1 = "No11_1.png"
 PicNo12_1 = "No12_1.png"
 PicNo1_1Ready = "No1_1Ready.png"
 PicNo2_1Ready = "No2_1Ready.png"
+PicNo3_1Ready = "No3_1Ready.png"
 PicNo4_1Ready = "No4_1Ready.png"
 PicNo5_1Ready = "No5_1Ready.png"
 PicNo6_1Ready = "No6_1Ready.png"
+PicNo7_1Ready = "No7_1Ready.png"
 PicNo9_1Ready = "No9_1Ready.png"
 PicNo10_1Ready = "No10_1Ready.png"
 PicNo11_1Ready = "No11_1Ready.png"
@@ -162,6 +172,27 @@ PicToEgo = "ToEgo.png"
 PicSelected = "Selected.png"
 PicSelectGift = "SelectGift.png"
 PicRandomGift = "RandomGift.png"
+
+
+def u8ones(shape): 
+    return np.ones(shape, dtype=np.uint8)
+
+def ipm(img): 
+    image_points = np.float32([
+      (539, 540), (749, 540), (959, 540), (1169, 540),
+                  (727, 705),             (1192, 705)
+    ])
+    rectified_points = np.float32([
+      (-2, 0), (-1, 0), (0, 0), (1, 0),
+               (-1, 1),         (1, 1)
+    ]) * 200 + np.float32([1920, 1080]) / 2
+
+    T = cv2.getPerspectiveTransform(image_points[[1,3,4,5]], rectified_points[[1,3,4,5]])
+    return cv2.warpPerspective(img,T,(img.shape[1], img.shape[0]))
+
+def trim_border(img):
+  h, w, _ = img.shape
+  return img[:int(h * 0.87)]
 
 def Path(pic):
     return path + pic
@@ -188,6 +219,22 @@ def FindPic(small_picture_path, similarity=0.85):
     small = cv2.imread(small_picture_path)
     res = aircv.find_template(pil2np(bag), small, similarity)
     return res["result"] if res else (-1, -1)
+
+def FindPic_IMP(small_picture_path, similarity=0.85):
+    '''
+    区域找图
+    :param small_picture_path:目标小图的路径
+    :param similarity:相似度,0.95
+    :return: (0,100) |(-1,-1)
+    '''
+    if not os.path.exists(small_picture_path):
+        return None
+    bag = ipm(pil2np(ImageGrab.grab()))
+    #Image.fromarray(bag).show()
+    small = cv2.imread(small_picture_path)
+    #Image.fromarray(small).show()
+    res = aircv.find_all_template(bag, small, 0.7)
+    return res
 
 def FindPicList(small_picture_path, similarity=0.85):
     '''
@@ -221,12 +268,18 @@ def ClickXY(r):
     pi.click()
     
 def StartBattle():
+    if FindPic(Path(PicEnterBattle)) != (-1,-1):
+        ClickXY((200,200))#误触发退回用
     if FindPic(Path(PicMapSign)) != (-1,-1):
         return
     print("Start Battle")
     retryCount = 1
     battleCount = 1
     while retryCount <  60:
+        if FindPic(Path(PicEnterBattle)) != (-1,-1):
+            ClickXY((200,200))#误触发退回用
+        if FindPic(Path(PicRewards)) != (-1,-1):
+            break
         if FindPic(Path(PicChoseLvUp)) != (-1,-1):
             break
         if FindPic(Path(PicSelectGift)) != (-1,-1):
@@ -280,7 +333,7 @@ def StartBattle():
                             ClickPic(Path(PicEventSkip))
                         if FindPic(Path(PicEventContinue)) != (-1,-1):
                             print("Charge Stop")
-                            break
+                            break                    
             ClickPic(Path(PicEventContinue))
                     
           
@@ -290,14 +343,19 @@ def StartBattle():
         else:
             print("Do Battle in Turn " + str(battleCount))
             ClickPic(Path(PicWinRater))
-            ClickPic(Path(PicStartFight))
+            if FindPic(Path(PicStartFight)) != (-1,-1):
+                ClickPic(Path(PicStartFight))
+            else:
+                pi.click()
+                ClickPic(Path(PicStartFight))
             battleCount = battleCount + 1
         time.sleep(3)
     print("Battle Finshed")
         
-def SeachrFor(pic):
+def SeachrFor(pic,s):
     print("Search for " + str(pic))
-    r = FindPicList(Path(pic))
+    r = FindPicList(Path(pic),s)
+    
     for i in r:
         ClickXY(i["result"])
         print("Find "+str(pic) + " in " + str(i["result"])+ " Try to get the Entrance")
@@ -361,68 +419,68 @@ def Searching():
             pi.click()
             Wait(30)
             break
-        if SeachrFor(PicEventLevelUp):
+        if SeachrFor(PicEventLevelUp,0.85):
             EventLevelUp()
             return False
             
-        if SeachrFor(PicNormalBattle11):
+        if SeachrFor(PicNormalBattle11,0.75):
             return False
-        if SeachrFor(PicNormalBattle22):
+        if SeachrFor(PicNormalBattle22,0.75):
             return False
-        if SeachrFor(PicNormalBattle33):
+        if SeachrFor(PicNormalBattle33,0.75):
             return False
-        if SeachrFor(PicAbnormalBattle):
+        if SeachrFor(PicAbnormalBattle,0.85):
             return False
-        if SeachrFor(PicAbnormalBattle2):
+        if SeachrFor(PicAbnormalBattle2,0.85):
             return False
-        if SeachrFor(PicAbnormalBattle3):
+        if SeachrFor(PicAbnormalBattle3,0.85):
             return False
-        if SeachrFor(PicAbnormalBattle32):
+        if SeachrFor(PicAbnormalBattle32,0.85):
             return False
-        if SeachrFor(PicBossBattle):
+        if SeachrFor(PicBossBattle,0.75):
             return False
-        if SeachrFor(PicBossBattle2):
+        if SeachrFor(PicBossBattle2,0.75):
             return False
-        if SeachrFor(PicBossBattle3):
+        if SeachrFor(PicBossBattle3,0.75):
             return False   
-        if SeachrFor(PicBossBattle32):
+        if SeachrFor(PicBossBattle32,0.75):
             return False  
-        if SeachrFor(PicEndPoint):
+        if SeachrFor(PicEndPoint,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint2):
+        if SeachrFor(PicEndPoint2,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint22):
+        if SeachrFor(PicEndPoint22,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint23):
+        if SeachrFor(PicEndPoint23,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint3):
+        if SeachrFor(PicEndPoint3,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint32):
+        if SeachrFor(PicEndPoint32,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint33):
+        if SeachrFor(PicEndPoint33,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint34):
+        if SeachrFor(PicEndPoint34,0.65):
             print("Finished the floor")
             return True
-        if SeachrFor(PicEndPoint4):
+        if SeachrFor(PicEndPoint4,0.65):
             print("Finished the floor")
             return True
         # if SeachrFor(PicEventSelectSinnner):
         #     EventSelectSinnner()
         #     return False
-        if SeachrFor(PicEventBattle):
+        if SeachrFor(PicEventBattle,0.7):
             EventChoice()
             return False
-        if SeachrFor(PicEventBattle3):
-            EventChoice()
-            return False
+        # if SeachrFor(PicEventBattle3):
+        #     EventChoice()
+        #     return False
        
         pi.scroll(-10) # 向下滚动10格
         pi.scroll(-10) # 向下滚动10格
@@ -524,6 +582,18 @@ def EventChoice():
             ClickPic(Path(PicEHellTerfly))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
+        #偷戒指？ego
+        elif FindPic(Path(PicEGadget)) != (-1,-1):
+            print("HellTerfly  EGO")
+            ClickPic(Path(PicEGadget))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+        #一叠钞票？ego
+        elif FindPic(Path(PicEBundle)) != (-1,-1):
+            print("HellTerfly  EGO")
+            ClickPic(Path(PicEBundle))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
         #Hello world？ego
         elif FindPic(Path(PicETown)) != (-1,-1):
             print("Hello town EGO")
@@ -533,7 +603,7 @@ def EventChoice():
             while FindPic(Path(PicEventContinue)) != (-1,-1):
                 ClickPic(Path(PicETown22))#升级卡不升级
                 ClickPic(Path(PicEventProceed))
-                ClickPic(Path(PicEventSkip))
+                ClickPic(Path(PicEventSkip))      
         else:
             print("All unknown ，select a random choice")
             ClickPic(Path(PicEventRandomSelect))
@@ -566,7 +636,10 @@ def CheckSinner():
         ClickPic(Path(PicNo1_1))     
     if FindPic(Path(PicNo2_1Ready)) == (-1,-1):
         print("No2 is not Ready,Check it on")
-        ClickPic(Path(PicNo2_1))      
+        ClickPic(Path(PicNo2_1))   
+    if FindPic(Path(PicNo3_1Ready)) == (-1,-1):
+        print("No3 is not Ready,Check it on")
+        ClickPic(Path(PicNo3_1))      
     if FindPic(Path(PicNo4_1Ready)) == (-1,-1):
         print("No4 is not Ready,Check it on")
         ClickPic(Path(PicNo4_1))
@@ -576,6 +649,9 @@ def CheckSinner():
     if FindPic(Path(PicNo6_1Ready)) == (-1,-1):
         print ("No6 is not Ready,Check it on")
         ClickPic(Path(PicNo6_1))
+    if FindPic(Path(PicNo7_1Ready)) == (-1,-1):
+        print ("No7 is not Ready,Check it on")
+        ClickPic(Path(PicNo7_1))
     if FindPic(Path(PicNo9_1Ready)) == (-1,-1):
          print ("No9 is not Ready,Check it on")
          ClickPic(Path(PicNo9_1))
@@ -601,25 +677,45 @@ def SeleSinner(pic_s,pic_p):
         
 def CheckNew():
     print("Select new sinner")
-    if FindPic(Path(PicNo2SignNew)) != (-1,-1):
+    if FindPic(Path(PicNo6SignNew)) != (-1,-1):
+        print("No6 was detected，Ready to fight")
+        ClickPic(Path(PicNo6Sign))      
+        ClickPic(Path(PicSelectNewSinner))
+        SeleSinner(Path(PicAleph),Path(PicNo6_1))
+        return
+    if FindPic(Path(PicNo3SignNew)) != (-1,-1):
+        print("No3 was detected，Ready to fight")
+        ClickPic(Path(PicNo3Sign))      
+        ClickPic(Path(PicSelectNewSinner))
+        SeleSinner(Path(PicAleph),Path(PicNo3_1))
+        return
+    if FindPic(Path(PicNo4SignNew)) != (-1,-1):
+        print("No4 was detected，Ready to fight")
+        ClickPic(Path(PicNo4Sign))      
+        ClickPic(Path(PicSelectNewSinner))
+        SeleSinner(Path(PicAleph),Path(PicNo4_1))
+        return
+    if FindPic(Path(PicNo1SignNew)) != (-1,-1):
         print("No2 was detected，Ready to fight")
-        ClickPic(Path(PicNo2Sign))      
+        ClickPic(Path(PicNo1Sign))      
         ClickPic(Path(PicSelectNewSinner))
-        SeleSinner(Path(PicAleph),Path(PicNo2_1))
+        SeleSinner(Path(PicAleph),Path(PicNo1_1))
         return
-    # 小唐无可用人格
-    # if FindPic(Path(PicNo3Sign)) == (-1,-1):
-    #     print("No3 was detected，Ready to fight")
-    #     ClickPic(Path(PicNo3Sign))      
+       
+    # if FindPic(Path(PicNo2SignNew)) != (-1,-1):
+    #     print("No2 was detected，Ready to fight")
+    #     ClickPic(Path(PicNo2Sign))      
     #     ClickPic(Path(PicSelectNewSinner))
+    #     SeleSinner(Path(PicAleph),Path(PicNo2_1))
     #     return
-    if FindPic(Path(PicNo5SignNew)) != (-1,-1):
-        print("No5 was detected，Ready to fight")
-        ClickPic(Path(PicNo5Sign))      
-        ClickPic(Path(PicSelectNewSinner))
-        SeleSinner(Path(PicAleph),Path(PicNo5_1))
-        return
-    # 希斯克里夫无可用人格
+    # if FindPic(Path(PicNo5SignNew)) != (-1,-1):
+    #     print("No5 was detected，Ready to fight")
+    #     ClickPic(Path(PicNo5Sign))      
+    #     ClickPic(Path(PicSelectNewSinner))
+    #     SeleSinner(Path(PicAleph),Path(PicNo5_1))
+    #     return
+   
+    # 
     # if FindPic(Path(PicNo7Sign)) == (-1,-1):
     #     print("No7 was detected，Ready to fight")
     #     ClickPic(Path(PicNo7Sign))      
@@ -657,8 +753,10 @@ def CheckNew():
         return
 
 def AfterWin():
-    # if FindPic(Path(PicMapSign)) != (-1,-1):
-    #     return
+    if FindPic(Path(PicEnterBattle)) != (-1,-1):
+        ClickXY((200,200))#误触发退回用
+    if FindPic(Path(PicRewards)) != (-1,-1):
+       return
     # count =1 
     # print("Check the afterwin branch for " +str(count)+" time")
     #while 1:
@@ -696,6 +794,7 @@ if __name__ == '__main__':
     pi.press('tab')
     time.sleep(.2)
     pi.keyUp('alt')
+
     while True:
         floor = 1
         step = 1
@@ -703,38 +802,42 @@ if __name__ == '__main__':
         status = True
         #activeWindowTitle = pi.getActiveWindowTitle()
         #print(activeWindowTitle)
-        ClickPic(Path(PicDrive))
-        ClickPic(Path(PicEnterMirror))
-        ClickPic(Path(PicEnterMirror2))
-        ClickPic(Path(PicEnterMirror3))
+        # ClickPic(Path(PicDrive))
+        # ClickPic(Path(PicEnterMirror))
+        # ClickPic(Path(PicEnterMirror2))
+        # ClickPic(Path(PicEnterMirror3))
       
-        print("Start " +str(floor)+" times loop") 
-        #初期礼物
-        print("Select the inital Ego gift") 
-        ClickPic(Path(PicRandomGift))
-        ClickPic(Path(PicSelectGift))
-        #初期人物选择
-        print("Selcet the inital sinners") 
-        ClickPic(Path(PicNo1))
-        ClickPic(Path(PicNo4))
-        ClickPic(Path(PicNo6))
-        ClickPic(Path(PicSelectSinner))
-        print("Change the personal") 
-        SeleSinner(Path(PicNo1Sign),Path(PicNo1_1))
-        SeleSinner(Path(PicNo4Sign),Path(PicNo4_1))
-        SeleSinner(Path(PicNo6Sign),Path(PicNo6_1))
-        time.sleep(2)
-        ClickPic(Path(PicConfirmW2))
-        Wait(30)
+        # print("Start " +str(floor)+" times loop") 
+        # #初期礼物
+        # print("Select the inital Ego gift") 
+        # ClickPic(Path(PicRandomGift))
+        # ClickPic(Path(PicSelectGift))
+        # #初期人物选择
+        # print("Selcet the inital sinners") 
+        # ClickPic(Path(PicNo2))
+        # ClickPic(Path(PicNo5))
+        # ClickPic(Path(PicNo7))
+        # ClickPic(Path(PicSelectSinner))
+        #print("Change the personal") 
+        # SeleSinner(Path(PicNo2Sign),Path(PicNo2_1))
+        # SeleSinner(Path(PicNo5Sign),Path(PicNo5_1))
+        # SeleSinner(Path(PicNo7Sign),Path(PicNo7_1))
+        
+        
+        # time.sleep(2)
+        # ClickPic(Path(PicConfirmW2))
+        # Wait(30)
         
         #迷宫循环
-        while step <= 9:
+        while step <= 12:
             if FindPic(Path(PicRewards)) != (-1,-1):
                 print("Finished the loop " +str(loop))
                 loop = loop + 1
+                print("Confirm")
                 ClickPic(Path(PicConfirmW))
                 pi.click()
                 time.sleep(15)
+                print("Receive")
                 ClickPic(Path(PicReceive))
                 pi.click()
                 Wait(50)
@@ -753,16 +856,16 @@ if __name__ == '__main__':
             StartBattle()
             AfterWin()
             if status :
-                print("Finish the " +str(floor)+" floor")
-                floor = floor + 1
-                step = 1
-                CheckNew()
-                time.sleep(5)
-                ClickXY((900,900))           
+                if FindPic(Path(PicRewards)) == (-1,-1):
+                    print("Finish the " +str(floor)+" floor")
+                    floor = floor + 1
+                    step = 1
+                    CheckNew()
+                    time.sleep(5)
+                    ClickXY((900,900))           
             else:
                 step = step + 1
-
-       
+        
 
    
     
