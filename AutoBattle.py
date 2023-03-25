@@ -7,11 +7,13 @@
 import cv2
 import aircv
 from PIL import ImageGrab
-from PIL import Image
 import numpy as np
 import os.path
 import pyautogui as pi
 import time 
+import logging
+import logging.handlers
+import datetime
 
 #图片定义
 path =  "D:\\WorkSapce\\Script\\"
@@ -84,15 +86,17 @@ PicEFieryDown = "EFieryDown.png"
 PicEHellTerfly = "EHellTerfly.png"
 PicEGadget = "EGadget.png"
 PicEBundle = "EBundle.png"
+PicEGrayCoat = "EGrayCoat.png"
+PicEtree = "Etree.png"
 PicETown = "ETown.png"
 PicETown22 = "ETown22.png"
-
 
 PicEveryHigh = "EveryHigh.png"
 PicEBossApple = "EBossApple.png"
 PicEBossFactory = "EBossFactory.png"
 PicEBossFactory2 = "EBossFactory2.png"
 PicEBossCalendar = "EBossCalendar.png"
+PicEBossShoes = "EBossShoes.png"
 
 PicAnnouncer = "Announcer.png"
 PicNo1 = "No1.png"
@@ -252,7 +256,7 @@ def FindPicList(small_picture_path, similarity=0.85):
     return res
 
 def Wait(x):
-    print("Wait loading for " +str(x) + " seconds")
+    logging.info("Wait loading for " +str(x) + " seconds")
     time.sleep(10)
     
 def ClickPic(pic_path):
@@ -272,10 +276,10 @@ def StartBattle():
         ClickXY((200,200))#误触发退回用
     if FindPic(Path(PicMapSign)) != (-1,-1):
         return
-    print("Start Battle")
+    logging.info("Start Battle")
     retryCount = 1
     battleCount = 1
-    while retryCount <  60:
+    while retryCount <  80:
         if FindPic(Path(PicEnterBattle)) != (-1,-1):
             ClickXY((200,200))#误触发退回用
         if FindPic(Path(PicRewards)) != (-1,-1):
@@ -285,63 +289,69 @@ def StartBattle():
         if FindPic(Path(PicSelectGift)) != (-1,-1):
             break
         if FindPic(Path(PicEventSkip)) != (-1,-1):
-            print("Boss battle event choice")
+            logging.info("Boss battle event choice")
             while FindPic(Path(PicEventContinue)) == (-1,-1):
                 ClickPic(Path(PicEventSkip))
                 if FindPic(Path(PicEBossApple)) != (-1,-1):
-                    print("Boss Apple Queen")
+                    logging.info("Boss Apple Queen")
                     while FindPic(Path(PicEventResult)) == (-1,-1):
-                        print("Charge Progress")
+                        logging.info("Charge Progress")
                         ClickPic(Path(PicEveryHigh))
                         ClickPic(Path(PicEventCommence))
                         if FindPic(Path(PicEventContinue)) != (-1,-1):
-                            print("Charge Stop")
+                            logging.info("Charge Stop")
                             break
-                if FindPic(Path(PicEBossFactory)) != (-1,-1):
-                    print("Boss Factory")
-                    ClickPic(Path(PicEBossFactory))
+                if FindPic(Path(PicEBossShoes)) != (-1,-1):
+                    logging.info("Boss Pink Shoes")
+                    ClickPic(Path(PicEBossShoes))
                     while FindPic(Path(PicEventContinue)) == (-1,-1):
-                        print("Charge Progress")
+                        logging.info("Charge Progress")
                         ClickPic(Path(PicEventProceed))
                         ClickPic(Path(PicEventSkip))
                         if FindPic(Path(PicEventContinue)) != (-1,-1):
-                            print("Charge Stop")
+                            logging.info("Charge Stop")
+                            break
+                if FindPic(Path(PicEBossFactory)) != (-1,-1):
+                    logging.info("Boss Factory")
+                    ClickPic(Path(PicEBossFactory))
+                    while FindPic(Path(PicEventContinue)) == (-1,-1):
+                        logging.info("Charge Progress")
+                        ClickPic(Path(PicEventProceed))
+                        ClickPic(Path(PicEventSkip))
+                        if FindPic(Path(PicEventContinue)) != (-1,-1):
+                            logging.info("Charge Stop")
                             break
                 if FindPic(Path(PicEBossFactory2)) != (-1,-1):
-                    print("Boss Factory2")
+                    logging.info("Boss Factory2")
                     while FindPic(Path(PicEventContinue)) == (-1,-1):
-                        print("Repeat No")
+                        logging.info("Repeat No")
                         ClickPic(Path(PicEBossFactory2))
                         ClickPic(Path(PicEventProceed))
                         ClickPic(Path(PicEventSkip))
                         if FindPic(Path(PicEventContinue)) != (-1,-1):
-                            print("Charge Stop")
+                            logging.info("Charge Stop")
                             break
                 if FindPic(Path(PicEBossCalendar)) != (-1,-1):
-                    print("Boss Calendar")
-                    while FindPic(Path(PicEBossCalendar)) == (-1,-1):
-                        print("Charge Progress")
-                        ClickPic(Path(PicEBossCalendar))
-                        ClickPic(Path(PicEventSkip))
-                        #判定阶段
-                        while FindPic(Path(PicEventAdvantage)) != (-1,-1):
-                            print("Event charge Progress")
-                            if FindPic(Path(PicEventContinue)) != (-1,-1):
-                                break
-                            ClickPic(Path(PicEveryHigh))
-                            ClickPic(Path(PicEventCommence))
-                            ClickPic(Path(PicEventSkip))
+                    logging.info("Boss Calendar")
+                    ClickPic(Path(PicEBossCalendar))
+                    ClickPic(Path(PicEventProceed))
+                    ClickPic(Path(PicEventSkip))
+                    #判定阶段
+                    while FindPic(Path(PicEventAdvantage)) != (-1,-1):
+                        logging.info("Event charge Progress")
                         if FindPic(Path(PicEventContinue)) != (-1,-1):
-                            print("Charge Stop")
-                            break                    
+                            break
+                        ClickPic(Path(PicEveryHigh))
+                        ClickPic(Path(PicEventCommence))
+                        ClickPic(Path(PicEventSkip))
             ClickPic(Path(PicEventContinue))
                     
           
-        print("Battle Icon check "+ str(retryCount) + " times")
+        logging.info("Battle Icon check "+ str(retryCount) + " times")
         if FindPic(Path(PicWinRater)) == (-1,-1):
             retryCount = retryCount + 1
         else:
-            print("Do Battle in Turn " + str(battleCount))
+            logging.info("Do Battle in Turn " + str(battleCount))
             ClickPic(Path(PicWinRater))
             if FindPic(Path(PicStartFight)) != (-1,-1):
                 ClickPic(Path(PicStartFight))
@@ -350,24 +360,24 @@ def StartBattle():
                 ClickPic(Path(PicStartFight))
             battleCount = battleCount + 1
         time.sleep(3)
-    print("Battle Finshed")
+    logging.info("Battle Finshed")
         
 def SeachrFor(pic,s):
-    print("Search for " + str(pic))
+    logging.info("Search for " + str(pic))
     r = FindPicList(Path(pic),s)
     
     for i in r:
         ClickXY(i["result"])
-        print("Find "+str(pic) + " in " + str(i["result"])+ " Try to get the Entrance")
+        logging.info("Find "+str(pic) + " in " + str(i["result"])+ " Try to get the Entrance")
         time.sleep(1)
         if FindPic(Path(PicEnterBattle)) != (-1,-1):
-            print("Get Battle Entrace Ready to Start")
+            logging.info("Get Battle Entrace Ready to Start")
             ClickPic(Path(PicEnterBattle))
             return True
     return False
 
 def EventLevelUp():
-    print("Level up event")
+    logging.info("Level up event")
     while FindPic(Path(PicEventChoice)) == (-1,-1):
         ClickPic(Path(PicEventSkip))
     while FindPic(Path(PicEventResult)) == (-1,-1):
@@ -377,9 +387,9 @@ def EventLevelUp():
         ClickPic(Path(PicEventContinue))
     ClickPic(Path(PicEventContinue))    
     for i in range(3):
-        print("Try to Level up for " + str(i)+ " times")
+        logging.info("Try to Level up for " + str(i)+ " times")
         if FindPic(Path(PicChoseLvUp)) != (-1,-1):
-            print("Select the sinner to Level Up")
+            logging.info("Select the sinner to Level Up")
             if FindPic(Path(Piclv10)) != (-1,-1):
                 ClickPic(Path(Piclv10))
             if FindPic(Path(Piclv15)) != (-1,-1):
@@ -406,28 +416,28 @@ def EventSelectSinnner():
     CheckNew()
 
 def Searching():
-    print("Start seachring")
+    logging.info("Start seachring")
     while True:
         if FindPic(Path(PicEnterBattle)) != (-1,-1):
             ClickXY((200,200))#误触发退回用
         if FindPic(Path(PicRewards)) != (-1,-1):
-            print("Finished the loop ？？？" )
+            logging.info("Finished the loop ？？？" )
             ClickPic(Path(PicConfirmW))
             pi.click()
-            time.sleep(5)
+            time.sleep(3)
             ClickPic(Path(PicReceive))
             pi.click()
-            Wait(30)
+            Wait(10)
             break
         if SeachrFor(PicEventLevelUp,0.85):
             EventLevelUp()
             return False
             
-        if SeachrFor(PicNormalBattle11,0.75):
+        if SeachrFor(PicNormalBattle11,0.85):
             return False
-        if SeachrFor(PicNormalBattle22,0.75):
+        if SeachrFor(PicNormalBattle22,0.85):
             return False
-        if SeachrFor(PicNormalBattle33,0.75):
+        if SeachrFor(PicNormalBattle33,0.85):
             return False
         if SeachrFor(PicAbnormalBattle,0.85):
             return False
@@ -446,31 +456,31 @@ def Searching():
         if SeachrFor(PicBossBattle32,0.75):
             return False  
         if SeachrFor(PicEndPoint,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint2,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint22,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint23,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint3,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint32,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint33,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint34,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         if SeachrFor(PicEndPoint4,0.65):
-            print("Finished the floor")
+            logging.info("Finished the floor")
             return True
         # if SeachrFor(PicEventSelectSinnner):
         #     EventSelectSinnner()
@@ -486,7 +496,7 @@ def Searching():
         pi.scroll(-10) # 向下滚动10格
 
 def EventChoice():
-    print("Start Event Choice ")
+    logging.info("Start Event Choice ")
     while FindPic(Path(PicEventChoice)) == (-1,-1):
         ClickPic(Path(PicEventSkip))
     while FindPic(Path(PicEventResult)) == (-1,-1):
@@ -495,108 +505,120 @@ def EventChoice():
         if FindPic(Path(PicEventContinue)) != (-1,-1):#如果提前结束跳出
             break
         #选择阶段
-        print("Select Choice ")
+        logging.info("Select Choice ")
         if FindPic(Path(PicElvup)) != (-1,-1):
-            print("Level Up event")
+            logging.info("Level Up event")
             EventLevelUp()
             return #特殊事件提前跳出
         if FindPic(Path(PicESelectSinner)) != (-1,-1):
-            print("Select sinner event")
+            logging.info("Select sinner event")
             EventSelectSinnner()
             return #特殊事件提前跳出
         #咖啡杯EGO专用
         if FindPic(Path(PicEshake)) != (-1,-1):
-            print("Coffee cup EGO")
+            logging.info("Coffee cup EGO")
             ClickPic(Path(PicEshake))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #血袋ego
         elif FindPic(Path(PicEbloodPack)) != (-1,-1):
-            print("EbloodPack  EGO")
+            logging.info("EbloodPack  EGO")
             ClickPic(Path(PicEbloodPack))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #灰烬ego
         elif FindPic(Path(PicEAshesChoice)) != (-1,-1):
-            print("EAshesChoice  EGO")
+            logging.info("EAshesChoice  EGO")
             ClickPic(Path(PicEAshesChoice))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #电🐏ego
         elif FindPic(Path(PicEeletronicSheep)) != (-1,-1):
-            print("EeletronicSheep  EGO")
+            logging.info("EeletronicSheep  EGO")
             ClickPic(Path(PicEeletronicSheep))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #子弹ego
         elif FindPic(Path(PicEnixieDivergencee)) != (-1,-1):
-            print("EnixieDivergencee  EGO")
+            logging.info("EnixieDivergencee  EGO")
             ClickPic(Path(PicEnixieDivergencee))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #电池ego
         elif FindPic(Path(PicEstandardBattery)) != (-1,-1):
-            print("standardBattery  EGO")
+            logging.info("standardBattery  EGO")
             ClickPic(Path(PicEstandardBattery))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #电线杆？ego
         elif FindPic(Path(PicElateTatto)) != (-1,-1):
-            print("ElateTatto  EGO")
+            logging.info("ElateTatto  EGO")
             ClickPic(Path(PicElateTatto))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #打火机ego
         elif FindPic(Path(PicEZippoLighter)) != (-1,-1):
-            print("ZippoLighter  EGO")
+            logging.info("ZippoLighter  EGO")
             ClickPic(Path(PicEZippoLighter))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #立方体ego
         elif FindPic(Path(PicEPerversion)) != (-1,-1):
-            print("Perversion  EGO")
+            logging.info("Perversion  EGO")
             ClickPic(Path(PicEPerversion))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #摘花ego
         elif FindPic(Path(PicEPickRose)) != (-1,-1):
-            print("PickRose  EGO")
+            logging.info("PickRose  EGO")
             ClickPic(Path(PicEPickRose))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #幻痛ego
         elif FindPic(Path(PicEPhantom)) != (-1,-1):
-            print("Phantom  EGO")
+            logging.info("Phantom  EGO")
             ClickPic(Path(PicEPhantom))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #火羽毛？ego
         elif FindPic(Path(PicEFieryDown)) != (-1,-1):
-            print("FieryDown  EGO")
+            logging.info("FieryDown  EGO")
             ClickPic(Path(PicEFieryDown))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #火蝴蝶？ego
         elif FindPic(Path(PicEHellTerfly)) != (-1,-1):
-            print("HellTerfly  EGO")
+            logging.info("HellTerfly  EGO")
             ClickPic(Path(PicEHellTerfly))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #偷戒指？ego
         elif FindPic(Path(PicEGadget)) != (-1,-1):
-            print("HellTerfly  EGO")
+            logging.info("HellTerfly  EGO")
             ClickPic(Path(PicEGadget))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #一叠钞票？ego
         elif FindPic(Path(PicEBundle)) != (-1,-1):
-            print("HellTerfly  EGO")
+            logging.info("HellTerfly  EGO")
             ClickPic(Path(PicEBundle))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+        #灰大衣ego
+        elif FindPic(Path(PicEGrayCoat)) != (-1,-1):
+            logging.info("GrayCoat  EGO")
+            ClickPic(Path(PicEGrayCoat))
+            ClickPic(Path(PicEventProceed))
+            ClickPic(Path(PicEventSkip))
+        #灰大衣ego
+        elif FindPic(Path(PicEtree)) != (-1,-1):
+            logging.info("Tree  EGO")
+            ClickPic(Path(PicEtree))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
         #Hello world？ego
         elif FindPic(Path(PicETown)) != (-1,-1):
-            print("Hello town EGO")
+            logging.info("Hello town EGO")
             ClickPic(Path(PicETown))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
@@ -605,14 +627,14 @@ def EventChoice():
                 ClickPic(Path(PicEventProceed))
                 ClickPic(Path(PicEventSkip))      
         else:
-            print("All unknown ，select a random choice")
+            logging.info("All unknown ，select a random choice")
             ClickPic(Path(PicEventRandomSelect))
             ClickPic(Path(PicEventProceed))
             ClickPic(Path(PicEventSkip))
             
     #判定阶段
     while FindPic(Path(PicEventAdvantage)) != (-1,-1):
-        print("Event charge Progress")
+        logging.info("Event charge Progress")
         if FindPic(Path(PicEventContinue)) != (-1,-1):
             break
         ClickPic(Path(PicEveryHigh))
@@ -622,7 +644,7 @@ def EventChoice():
         
     #结束阶段
     while FindPic(Path(PicEventContinue)) == (-1,-1):
-        print("Event end Progress")
+        logging.info("Event end Progress")
         ClickPic(Path(PicEventSkip))
     ClickPic(Path(PicEventContinue))
     ClickXY((900,900))
@@ -630,86 +652,86 @@ def EventChoice():
 def CheckSinner():
     if FindPic(Path(PicMapSign)) != (-1,-1):
         return
-    print("Begin the sinner check progress")
+    logging.info("Begin the sinner check progress")
     if FindPic(Path(PicNo1_1Ready)) == (-1,-1):
-        print("No1 is not Ready,Check it on")
+        logging.info("No1 is not Ready,Check it on")
         ClickPic(Path(PicNo1_1))     
     if FindPic(Path(PicNo2_1Ready)) == (-1,-1):
-        print("No2 is not Ready,Check it on")
+        logging.info("No2 is not Ready,Check it on")
         ClickPic(Path(PicNo2_1))   
     if FindPic(Path(PicNo3_1Ready)) == (-1,-1):
-        print("No3 is not Ready,Check it on")
+        logging.info("No3 is not Ready,Check it on")
         ClickPic(Path(PicNo3_1))      
     if FindPic(Path(PicNo4_1Ready)) == (-1,-1):
-        print("No4 is not Ready,Check it on")
+        logging.info("No4 is not Ready,Check it on")
         ClickPic(Path(PicNo4_1))
     if FindPic(Path(PicNo5_1Ready)) == (-1,-1):
-         print ("No5 is not Ready,Check it on")
+         logging.info ("No5 is not Ready,Check it on")
          ClickPic(Path(PicNo5_1))
     if FindPic(Path(PicNo6_1Ready)) == (-1,-1):
-        print ("No6 is not Ready,Check it on")
+        logging.info ("No6 is not Ready,Check it on")
         ClickPic(Path(PicNo6_1))
     if FindPic(Path(PicNo7_1Ready)) == (-1,-1):
-        print ("No7 is not Ready,Check it on")
+        logging.info ("No7 is not Ready,Check it on")
         ClickPic(Path(PicNo7_1))
     if FindPic(Path(PicNo9_1Ready)) == (-1,-1):
-         print ("No9 is not Ready,Check it on")
+         logging.info ("No9 is not Ready,Check it on")
          ClickPic(Path(PicNo9_1))
     if FindPic(Path(PicNo10_1Ready)) == (-1,-1):
-         print ("No10 is not Ready,Check it on")
+         logging.info ("No10 is not Ready,Check it on")
          ClickPic(Path(PicNo10_1))
     if FindPic(Path(PicNo11_1Ready)) == (-1,-1):
-         print ("No11 is not Ready,Check it on")
+         logging.info ("No11 is not Ready,Check it on")
          ClickPic(Path(PicNo11_1))
     if FindPic(Path(PicNo12_1Ready)) == (-1,-1):
-        print ("No12 is not Ready,Check it on")
+        logging.info ("No12 is not Ready,Check it on")
         ClickPic(Path(PicNo12_1))
-    print("Check Finished")
+    logging.info("Check Finished")
     ClickPic(Path(PicStartBattle))
 
 def SeleSinner(pic_s,pic_p):
     ClickPic(pic_s)
     ClickPic(pic_p)
     while FindPic(Path(PicConfirmW)) != (-1,-1):
-        print("sinner confirm")
+        logging.info("sinner confirm")
         ClickPic(Path(PicConfirmW))
     pi.click()
         
 def CheckNew():
-    print("Select new sinner")
+    logging.info("Select new sinner")
     if FindPic(Path(PicNo6SignNew)) != (-1,-1):
-        print("No6 was detected，Ready to fight")
+        logging.info("No6 was detected，Ready to fight")
         ClickPic(Path(PicNo6Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo6_1))
         return
     if FindPic(Path(PicNo3SignNew)) != (-1,-1):
-        print("No3 was detected，Ready to fight")
+        logging.info("No3 was detected，Ready to fight")
         ClickPic(Path(PicNo3Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo3_1))
         return
     if FindPic(Path(PicNo4SignNew)) != (-1,-1):
-        print("No4 was detected，Ready to fight")
+        logging.info("No4 was detected，Ready to fight")
         ClickPic(Path(PicNo4Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo4_1))
         return
     if FindPic(Path(PicNo1SignNew)) != (-1,-1):
-        print("No2 was detected，Ready to fight")
+        logging.info("No1 was detected，Ready to fight")
         ClickPic(Path(PicNo1Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo1_1))
         return
        
     # if FindPic(Path(PicNo2SignNew)) != (-1,-1):
-    #     print("No2 was detected，Ready to fight")
+    #     logging.info("No2 was detected，Ready to fight")
     #     ClickPic(Path(PicNo2Sign))      
     #     ClickPic(Path(PicSelectNewSinner))
     #     SeleSinner(Path(PicAleph),Path(PicNo2_1))
     #     return
     # if FindPic(Path(PicNo5SignNew)) != (-1,-1):
-    #     print("No5 was detected，Ready to fight")
+    #     logging.info("No5 was detected，Ready to fight")
     #     ClickPic(Path(PicNo5Sign))      
     #     ClickPic(Path(PicSelectNewSinner))
     #     SeleSinner(Path(PicAleph),Path(PicNo5_1))
@@ -717,36 +739,36 @@ def CheckNew():
    
     # 
     # if FindPic(Path(PicNo7Sign)) == (-1,-1):
-    #     print("No7 was detected，Ready to fight")
+    #     logging.info("No7 was detected，Ready to fight")
     #     ClickPic(Path(PicNo7Sign))      
     #     ClickPic(Path(PicSelectNewSinner))
     #     return
     # 驯鹿内奸不用
     # if FindPic(Path(PicNo8Sign)) == (-1,-1):
-    #     print("No8 was detected，Ready to fight")
+    #     logging.info("No8 was detected，Ready to fight")
     #     ClickPic(Path(PicNo8Sign))      
     #     ClickPic(Path(PicSelectNewSinner))
     #     return
     if FindPic(Path(PicNo9SignNew)) != (-1,-1):
-        print("No9 was detected，Ready to fight")
+        logging.info("No9 was detected，Ready to fight")
         ClickPic(Path(PicNo9Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo9_1))
         return
     if FindPic(Path(PicNo10SignNew)) != (-1,-1):
-        print("No10 was detected，Ready to fight")
+        logging.info("No10 was detected，Ready to fight")
         ClickPic(Path(PicNo10Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo10_1))
         return
     if FindPic(Path(PicNo11SignNew)) != (-1,-1):
-        print("No11 was detected，Ready to fight")
+        logging.info("No11 was detected，Ready to fight")
         ClickPic(Path(PicNo11Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo11_1))
         return
     if FindPic(Path(PicNo12Sign)) != (-1,-1):
-        print("No12 was detected，Ready to fight")
+        logging.info("No12 was detected，Ready to fight")
         ClickPic(Path(PicNo12Sign))      
         ClickPic(Path(PicSelectNewSinner))
         SeleSinner(Path(PicAleph),Path(PicNo12_1))
@@ -758,10 +780,10 @@ def AfterWin():
     if FindPic(Path(PicRewards)) != (-1,-1):
        return
     # count =1 
-    # print("Check the afterwin branch for " +str(count)+" time")
+    logging.info("Check the afterwin branch" )
     #while 1:
     if FindPic(Path(PicChoseLvUp)) != (-1,-1):
-        print("Select the sinner to Level Up")
+        logging.info("Select the sinner to Level Up")
         if FindPic(Path(Piclv10)) != (-1,-1):
             ClickPic(Path(Piclv10))
         if FindPic(Path(Piclv15)) != (-1,-1):
@@ -777,15 +799,24 @@ def AfterWin():
         ClickPic(Path(PicConfirm))
         return
     if FindPic(Path(PicSelectGift)) != (-1,-1):
-        print("Select the Ego Gift")
+        logging.info("Select the Ego Gift")
         ClickPic(Path(PicRandomGift))
         ClickPic(Path(PicSelectGift))
         time.sleep(2)
         ClickXY((900,900))    
         #WaitFor(PicConfirmW)
         return
+
+def loginit(): 
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+        filename="log.txt",
+        filemode="w"  # 每次重启程序，覆盖之前的日志
+    )
     
 if __name__ == '__main__':
+    loginit()
     pi.FAILSAFE=False
     pi.PAUSE = 1
     loop = 1 
@@ -800,49 +831,49 @@ if __name__ == '__main__':
         step = 1
         finish = 0
         status = True
-        #activeWindowTitle = pi.getActiveWindowTitle()
-        #print(activeWindowTitle)
-        # ClickPic(Path(PicDrive))
-        # ClickPic(Path(PicEnterMirror))
-        # ClickPic(Path(PicEnterMirror2))
-        # ClickPic(Path(PicEnterMirror3))
+        activeWindowTitle = pi.getActiveWindowTitle()
+        logging.info(activeWindowTitle)
+        ClickPic(Path(PicDrive))
+        ClickPic(Path(PicEnterMirror))
+        ClickPic(Path(PicEnterMirror2))
+        ClickPic(Path(PicEnterMirror3))
       
-        # print("Start " +str(floor)+" times loop") 
-        # #初期礼物
-        # print("Select the inital Ego gift") 
-        # ClickPic(Path(PicRandomGift))
-        # ClickPic(Path(PicSelectGift))
-        # #初期人物选择
-        # print("Selcet the inital sinners") 
-        # ClickPic(Path(PicNo2))
-        # ClickPic(Path(PicNo5))
-        # ClickPic(Path(PicNo7))
-        # ClickPic(Path(PicSelectSinner))
-        #print("Change the personal") 
-        # SeleSinner(Path(PicNo2Sign),Path(PicNo2_1))
-        # SeleSinner(Path(PicNo5Sign),Path(PicNo5_1))
-        # SeleSinner(Path(PicNo7Sign),Path(PicNo7_1))
+        logging.info("Start " +str(floor)+" times loop") 
+        #初期礼物
+        logging.info("Select the inital Ego gift") 
+        ClickPic(Path(PicRandomGift))
+        ClickPic(Path(PicSelectGift))
+        #初期人物选择
+        logging.info("Selcet the inital sinners") 
+        ClickPic(Path(PicNo2))
+        ClickPic(Path(PicNo5))
+        ClickPic(Path(PicNo7))
+        ClickPic(Path(PicSelectSinner))
+        logging.info("Change the personal") 
+        SeleSinner(Path(PicNo2Sign),Path(PicNo2_1))
+        SeleSinner(Path(PicNo5Sign),Path(PicNo5_1))
+        SeleSinner(Path(PicNo7Sign),Path(PicNo7_1))
         
         
-        # time.sleep(2)
-        # ClickPic(Path(PicConfirmW2))
-        # Wait(30)
+        time.sleep(2)
+        ClickPic(Path(PicConfirmW2))
+        Wait(15)
         
         #迷宫循环
         while step <= 12:
             if FindPic(Path(PicRewards)) != (-1,-1):
-                print("Finished the loop " +str(loop))
+                logging.info("Finished the loop " +str(loop))
                 loop = loop + 1
-                print("Confirm")
+                logging.info("Confirm")
                 ClickPic(Path(PicConfirmW))
                 pi.click()
                 time.sleep(15)
-                print("Receive")
+                logging.info("Receive")
                 ClickPic(Path(PicReceive))
                 pi.click()
-                Wait(50)
+                Wait(15)
                 break
-            print("Auto Run " +str(floor)+" floor and " +str(step)+" step")
+            logging.info("Auto Run " +str(floor)+" floor and " +str(step)+" step")
             pi.scroll(10) # 向上滚动10格
             pi.scroll(10) # 向上滚动10格
             pi.scroll(10) # 向上滚动10格
@@ -857,7 +888,7 @@ if __name__ == '__main__':
             AfterWin()
             if status :
                 if FindPic(Path(PicRewards)) == (-1,-1):
-                    print("Finish the " +str(floor)+" floor")
+                    logging.info("Finish the " +str(floor)+" floor")
                     floor = floor + 1
                     step = 1
                     CheckNew()
@@ -865,9 +896,6 @@ if __name__ == '__main__':
                     ClickXY((900,900))           
             else:
                 step = step + 1
-        
-
-   
-    
+    #StartBattle()
         
     
